@@ -6,6 +6,8 @@ import {
   ShopOption,
   ShopSelect,
 } from "@/components/shops/ShopSelect";
+import { MarkdownItemsTable } from "@/components/markdown/MarkdownItemsTable";
+import { markdownItemsByShop } from "@/data/mockMarkdownItems";
 import { shops } from "@/data/mockShops";
 
 const STORAGE_KEY = "newGoodsManagement.lastShopId";
@@ -40,6 +42,10 @@ export function MarkdownItemsView() {
     }
   }
 
+  const items = selectedShop
+    ? markdownItemsByShop[selectedShop.value] ?? []
+    : [];
+
   return (
     <div>
       <ShopSelect
@@ -48,9 +54,7 @@ export function MarkdownItemsView() {
       />
 
       {selectedShop && (
-        <p className="mt-6 text-sm text-gray-600">
-          Selected shop: {selectedShop.label}
-        </p>
+        <MarkdownItemsTable items={items} />
       )}
     </div>
   );
