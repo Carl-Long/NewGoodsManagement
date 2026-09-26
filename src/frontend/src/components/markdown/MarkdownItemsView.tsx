@@ -1,50 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
-import {
-  ShopOption,
-  ShopSelect,
-} from "@/components/shops/ShopSelect";
+import { IncludeZeroStockToggle } from "@/components/markdown/IncludeZeroStockToggle";
 import { MarkdownItemsTable } from "@/components/markdown/MarkdownItemsTable";
+import {
+  ShopSelect,
+  type ShopOption,
+} from "@/components/shops/ShopSelect";
 import { markdownItemsByShop } from "@/data/mockMarkdownItems";
 import { shops } from "@/data/mockShops";
 
 const STORAGE_KEY = "newGoodsManagement.lastShopId";
+const STORAGE_EVENT = "newGoodsManagement.shopChanged";
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(STORAGE_EVENT, callback);
+
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(STORAGE_EVENT, callback);
+  };
+}
+
+function getSnapshot() {
+  return localStorage.getItem(STORAGE_KEY);
+}
+
+function getServerSnapshot() {
+  return null;
+}
 
 export function MarkdownItemsView() {
-  const [selectedShop, setSelectedShop] =
-    useState<ShopOption | null>(null);
+  const [includeZeroStock, setIncludeZeroStock] = useState(false);
 
-  useEffect(() => {
-    const storedShopId = localStorage.getItem(STORAGE_KEY);
+  const storedShopId = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
-    if (!storedShopId) {
-      return;
-    }
-
-    const shop = shops.find(
-      (shop) => shop.value === Number(storedShopId),
-    );
-
-    if (shop) {
-      setSelectedShop(shop);
-    }
-  }, []);
+  const selectedShop: ShopOption | null = storedShopId
+    ? shops.find((shop) => shop.value === Number(storedShopId)) ?? null
+    : null;
 
   function handleShopChange(shop: ShopOption | null) {
-    setSelectedShop(shop);
-
     if (shop) {
       localStorage.setItem(STORAGE_KEY, shop.value.toString());
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
+
+    window.dispatchEvent(new Event(STORAGE_EVENT));
   }
 
   const items = selectedShop
     ? markdownItemsByShop[selectedShop.value] ?? []
     : [];
+
+  const visibleItems = includeZeroStock
+    ? items
+    : items.filter((item) => item.stock > 0);
 
   return (
     <div>
@@ -54,7 +71,16 @@ export function MarkdownItemsView() {
       />
 
       {selectedShop && (
-        <MarkdownItemsTable items={items} />
+        <>
+          <div className="mt-6">
+            <IncludeZeroStockToggle
+              checked={includeZeroStock}
+              onChange={setIncludeZeroStock}
+            />
+          </div>
+
+          <MarkdownItemsTable items={visibleItems} />
+        </>
       )}
     </div>
   );
