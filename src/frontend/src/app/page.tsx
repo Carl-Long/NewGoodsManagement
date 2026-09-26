@@ -1,4 +1,4 @@
-import { ShopSelect } from "@/components/shops/ShopSelect";
+import { MarkdownItemsView } from "@/components/markdown/MarkdownItemsView";
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
         </p>
       </div>
 
-      <ShopSelect />
+      <MarkdownItemsView />
     </main>
   );
 }
