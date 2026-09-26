@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/backend/">
+    <Project Path="src/backend/NewGoodsManagement.Api/NewGoodsManagement.Api.csproj" />
+    <Project Path="src/backend/NewGoodsManagement.Application/NewGoodsManagement.Application.csproj" />
+    <Project Path="src/backend/NewGoodsManagement.Domain/NewGoodsManagement.Domain.csproj" />
+    <Project Path="src/backend/NewGoodsManagement.Infrastructure/NewGoodsManagement.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NewGoodsManagement.Application.Tests/NewGoodsManagement.Application.Tests.csproj" />
+    <Project Path="tests/NewGoodsManagement.Domain.Tests/NewGoodsManagement.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
