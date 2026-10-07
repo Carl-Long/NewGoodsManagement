@@ -8,16 +8,16 @@ namespace NewGoodsManagement.Api.Controllers;
 public sealed class ShopsController(ShopService shopService) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<IReadOnlyList<ShopOptionDto>> GetShops([FromQuery] string? search = null)
+    public ActionResult<IReadOnlyList<ShopOptionDto>> GetShopOptions([FromQuery] string? search = null)
     {
         var shops = shopService.GetShops(search);
         return Ok(shops);
     }
 
-    [HttpGet("{shopId:guid}")]
-    public ActionResult<ShopOptionDto> GetShop(Guid shopId)
+    [HttpGet("{id:guid}")]
+    public ActionResult<ShopOptionDto> GetShopOption(Guid id)
     {
-        var shop = shopService.GetShop(shopId);
+        var shop = shopService.GetShop(id);
 
         if (shop is null) return NotFound();
 

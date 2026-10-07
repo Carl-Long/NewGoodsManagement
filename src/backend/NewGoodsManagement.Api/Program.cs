@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddSingleton<ShopService>();
-builder.Services.AddSingleton<MarkdownService>();
+builder.Services.AddScoped<ShopService>();
+builder.Services.AddScoped<MarkdownService>();
 
 var app = builder.Build();
 
