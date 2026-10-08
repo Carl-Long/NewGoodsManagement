@@ -2,35 +2,39 @@
 
 import AsyncSelect from "react-select/async";
 
-import { shops } from "@/data/mockShops";
+import { searchShops, type ShopDto,} from "@/lib/api/shops";
 
-export type ShopOption = {
-  value: number;
+type ShopOption = {
+  value: string;
   label: string;
+  shop: ShopDto;
 };
 
 type ShopSelectProps = {
-  value: ShopOption | null;
-  onChange: (shop: ShopOption | null) => void;
+  value: ShopDto | null;
+  onChange: (shop: ShopDto | null) => void;
 };
 
-function searchShops(inputValue: string): Promise<ShopOption[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const search = inputValue.trim().toLowerCase();
+function toShopOption(shop: ShopDto): ShopOption {
+  return {
+    value: shop.id,
+    label: `${shop.code} - ${shop.name}`,
+    shop,
+  };
+}
 
-      if (search.length < 2) {
-        resolve([]);
-        return;
-      }
+async function loadShopOptions(
+  inputValue: string,
+): Promise<ShopOption[]> {
+  const search = inputValue.trim();
 
-      resolve(
-        shops.filter((shop) =>
-          shop.label.toLowerCase().includes(search),
-        ),
-      );
-    }, 300);
-  });
+  if (search.length < 2) {
+    return [];
+  }
+
+  const shops = await searchShops(search);
+
+  return shops.map(toShopOption);
 }
 
 export function ShopSelect({
@@ -49,12 +53,12 @@ export function ShopSelect({
       <AsyncSelect<ShopOption>
         instanceId="shop-select"
         inputId="shop-select"
-        value={value}
-        loadOptions={searchShops}
-        onChange={onChange}
+        value={value ? toShopOption(value) : null}
+        loadOptions={loadShopOptions}
+        onChange={(option) => onChange(option?.shop ?? null)}
         placeholder="Search for a shop..."
         noOptionsMessage={({ inputValue }) =>
-          inputValue.length < 2
+          inputValue.trim().length < 2
             ? "Type at least 2 characters"
             : "No shops found"
         }

@@ -1,67 +1,61 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
 import { IncludeZeroStockToggle } from "@/components/markdown/IncludeZeroStockToggle";
-import { MarkdownItemsTable } from "@/components/markdown/MarkdownItemsTable";
+import { ShopSelect } from "@/components/shops/ShopSelect";
+import { ApiError } from "@/lib/api/client";
 import {
-  ShopSelect,
-  type ShopOption,
-} from "@/components/shops/ShopSelect";
-import { markdownItemsByShop } from "@/data/mockMarkdownItems";
-import { shops } from "@/data/mockShops";
+  getShop,
+  type ShopDto,
+} from "@/lib/api/shops";
 
 const STORAGE_KEY = "newGoodsManagement.lastShopId";
-const STORAGE_EVENT = "newGoodsManagement.shopChanged";
-
-function subscribe(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(STORAGE_EVENT, callback);
-
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(STORAGE_EVENT, callback);
-  };
-}
-
-function getSnapshot() {
-  return localStorage.getItem(STORAGE_KEY);
-}
-
-function getServerSnapshot() {
-  return null;
-}
 
 export function MarkdownItemsView() {
+  const [selectedShop, setSelectedShop] = useState<ShopDto | null>(null);
+
   const [includeZeroStock, setIncludeZeroStock] = useState(false);
 
-  const storedShopId = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot,
-  );
+  useEffect(() => {
+    const storedShopId = localStorage.getItem(STORAGE_KEY);
 
-  const selectedShop: ShopOption | null = storedShopId
-    ? shops.find((shop) => shop.value === Number(storedShopId)) ?? null
-    : null;
+    if (!storedShopId) {
+      return;
+    }
 
-  function handleShopChange(shop: ShopOption | null) {
+    let cancelled = false;
+
+    async function restoreShop() {
+      try {
+        const shop = await getShop(storedShopId!);
+
+        if (!cancelled) {
+          setSelectedShop(shop);
+        }
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404) {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    }
+
+    void restoreShop();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function handleShopChange(shop: ShopDto | null) {
+    setSelectedShop(shop);
+
     if (shop) {
-      localStorage.setItem(STORAGE_KEY, shop.value.toString());
+      localStorage.setItem(STORAGE_KEY, shop.id);
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-
-    window.dispatchEvent(new Event(STORAGE_EVENT));
   }
-
-  const items = selectedShop
-    ? markdownItemsByShop[selectedShop.value] ?? []
-    : [];
-
-  const visibleItems = includeZeroStock
-    ? items
-    : items.filter((item) => item.stock > 0);
 
   return (
     <div>
@@ -71,16 +65,12 @@ export function MarkdownItemsView() {
       />
 
       {selectedShop && (
-        <>
-          <div className="mt-6">
-            <IncludeZeroStockToggle
-              checked={includeZeroStock}
-              onChange={setIncludeZeroStock}
-            />
-          </div>
-
-          <MarkdownItemsTable items={visibleItems} />
-        </>
+        <div className="mt-6">
+          <IncludeZeroStockToggle
+            checked={includeZeroStock}
+            onChange={setIncludeZeroStock}
+          />
+        </div>
       )}
     </div>
   );
