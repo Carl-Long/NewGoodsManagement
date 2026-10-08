@@ -1,7 +1,7 @@
-import type { MarkdownItem } from "@/data/mockMarkdownItems";
+import type { MarkdownItemDto } from "@/lib/api/markdowns";
 
 type MarkdownItemsTableProps = {
-  items: MarkdownItem[];
+  items: MarkdownItemDto[];
 };
 
 export function MarkdownItemsTable({
@@ -46,8 +46,9 @@ export function MarkdownItemsTable({
 
           <tbody className="divide-y divide-gray-200 bg-white">
             {items.map((item) => (
-              <tr key={item.id}
-                 className="transition-colors hover:bg-gray-50"
+              <tr
+                key={item.id}
+                className="transition-colors hover:bg-gray-50"
               >
                 <td className="px-4 py-3 text-sm font-medium text-gray-900">
                   {item.name}
@@ -70,7 +71,7 @@ export function MarkdownItemsTable({
                 </td>
 
                 <td className="px-4 py-3 text-right text-sm text-gray-600">
-                  {item.stock}
+                  {item.stockQuantity}
                 </td>
               </tr>
             ))}
