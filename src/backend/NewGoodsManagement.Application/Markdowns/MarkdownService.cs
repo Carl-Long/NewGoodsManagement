@@ -59,8 +59,9 @@ public sealed class MarkdownService(ShopService shopService)
         int StockQuantity);
 
     // Simulates the markdown items dataset
-    private static readonly IReadOnlyList<MarkdownItem> Items =
+private static readonly IReadOnlyList<MarkdownItem> Items =
     [
+        // Oxford
         new(
             Guid.Parse("10000000-0000-0000-0000-000000000001"),
             Guid.Parse("11111111-1111-1111-1111-111111111111"),
@@ -102,6 +103,127 @@ public sealed class MarkdownService(ShopService shopService)
             5),
 
         new(
+            Guid.Parse("10000000-0000-0000-0000-000000000005"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Black Handbag",
+            "Accessories",
+            20.00m,
+            12.00m,
+            40m,
+            3),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000006"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Board Game",
+            "Toys",
+            15.00m,
+            9.00m,
+            40m,
+            6),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000007"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Canvas Print",
+            "Homeware",
+            14.00m,
+            7.00m,
+            50m,
+            2),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000008"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Denim Jeans",
+            "Clothing",
+            22.00m,
+            14.00m,
+            36.36m,
+            4),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000009"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Glass Bowl",
+            "Homeware",
+            8.00m,
+            4.00m,
+            50m,
+            8),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000010"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Green Jumper",
+            "Clothing",
+            16.00m,
+            10.00m,
+            37.5m,
+            1),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000011"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Kitchen Clock",
+            "Homeware",
+            11.00m,
+            6.00m,
+            45.45m,
+            3),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000012"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Leather Belt",
+            "Accessories",
+            9.00m,
+            5.00m,
+            44.44m,
+            0),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000013"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Photo Frame",
+            "Homeware",
+            7.00m,
+            3.50m,
+            50m,
+            9),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000014"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Running Shoes",
+            "Footwear",
+            30.00m,
+            18.00m,
+            40m,
+            2),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000015"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Striped Scarf",
+            "Accessories",
+            10.00m,
+            6.00m,
+            40m,
+            5),
+
+        new(
+            Guid.Parse("10000000-0000-0000-0000-000000000016"),
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            "Wooden Tray",
+            "Homeware",
+            13.00m,
+            8.00m,
+            38.46m,
+            4),
+
+        // Oxford Headington
+        new(
             Guid.Parse("20000000-0000-0000-0000-000000000001"),
             Guid.Parse("22222222-2222-2222-2222-222222222222"),
             "Blue Jacket",
@@ -121,6 +243,7 @@ public sealed class MarkdownService(ShopService shopService)
             40m,
             0),
 
+        // Reading
         new(
             Guid.Parse("30000000-0000-0000-0000-000000000001"),
             Guid.Parse("33333333-3333-3333-3333-333333333333"),
