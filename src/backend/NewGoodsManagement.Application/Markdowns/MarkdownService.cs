@@ -8,8 +8,8 @@ public sealed class MarkdownService(ShopService shopService)
     public PagedResult<MarkdownItemDto>? GetMarkdownItems(Guid shopId, bool includeZeroStock, int page, int pageSize)
     {
         // For now, null indicates that the shop does not exist or is inactive.
-        // Once global exception handling is introduced, this can be replaced
-        // with an application-specific exception and translated to a 404 centrally.
+        // Once global exception handling is introduced, replace this with an
+        // application-specific exception that is translated to a 404 centrally.
         if (!shopService.IsActiveShop(shopId))
         {
             return null;
@@ -22,37 +22,50 @@ public sealed class MarkdownService(ShopService shopService)
             query = query.Where(item => item.StockQuantity > 0);
         }
 
-        // Because the current source is an in-memory collection, materialise once
-        // to avoid multiple-enumeration warnings.
-        //
-        // When this moves to EF Core/IQueryable, do not materialise the full result
-        // set here. Use CountAsync() for the total and then apply Skip/Take before
-        // ToListAsync() so pagination happens in the database.
-        //
-        // Use a deterministic sort order before paging.
-        // If multiple items have the same category, the additional sort fields ensure
-        // their relative order stays consistent so items are not skipped or repeated
-        // across pages.
-        var filteredItems = query
+        var itemsToSkip = (page - 1) * pageSize;
+
+        // CURRENT: In-memory implementation.
+        // Materialise the ordered results once to avoid multiple enumeration.
+        // The final id sort provides deterministic ordering, which is important
+        // when using Skip/Take for pagination.
+        var orderedItems = query
             .OrderBy(item => item.Category)
             .ThenBy(item => item.Name)
             .ThenBy(item => item.Id)
             .ToList();
 
-        var totalCount = filteredItems.Count;
-        var itemsToSkip = (page - 1) * pageSize;
+        var totalCount = orderedItems.Count;
 
-        var items = filteredItems
+        var items = orderedItems
             .Skip(itemsToSkip)
             .Take(pageSize)
             .Select(MapToMarkdownItemDto)
             .ToList();
 
+        /*
+        // FUTURE: EF Core implementation.
+        // Remove the orderedItems intermediate collection entirely.
+        // Keep query as IQueryable so counting, ordering, paging and projection
+        // are performed by the database.
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderBy(item => item.Category)
+            .ThenBy(item => item.Name)
+            .ThenBy(item => item.Id)
+            .Skip(itemsToSkip)
+            .Take(pageSize)
+            .Select(MarkdownItemProjection)
+            .ToListAsync(cancellationToken);
+        */
+
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
         return new PagedResult<MarkdownItemDto>(items, page, pageSize, totalCount, totalPages);
     }
-    
+
+    // CURRENT: Simple mapper used once the data is already in memory.
     private static MarkdownItemDto MapToMarkdownItemDto(MarkdownItem item)
     {
         return new MarkdownItemDto(
@@ -65,6 +78,22 @@ public sealed class MarkdownService(ShopService shopService)
             item.StockQuantity);
     }
 
+    /*
+    // FUTURE: EF Core projection.
+    // Replace the mapper method above with this expression so EF Core can
+    // translate the DTO projection into SQL before the query is materialised.
+    //
+    private static readonly Expression<Func<MarkdownItem, MarkdownItemDto>> MarkdownItemProjection =
+        item => new MarkdownItemDto(
+            item.Id,
+            item.Name,
+            item.Category,
+            item.OriginalPrice,
+            item.NewPrice,
+            item.DiscountPercentage,
+            item.StockQuantity);
+    */
+    
     // Simulates the undecided domain entity to allow mapping here for now
     private sealed record MarkdownItem(
         Guid Id,
