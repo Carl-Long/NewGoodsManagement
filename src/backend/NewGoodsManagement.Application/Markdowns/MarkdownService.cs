@@ -10,7 +10,10 @@ public sealed class MarkdownService(ShopService shopService)
         // For now, null indicates that the shop does not exist or is inactive.
         // Once global exception handling is introduced, this can be replaced
         // with an application-specific exception and translated to a 404 centrally.
-        if (!shopService.IsActiveShop(shopId)) return null;
+        if (!shopService.IsActiveShop(shopId))
+        {
+            return null;
+        }
 
         var query = Items.Where(item => item.ShopId == shopId);
 
@@ -37,11 +40,12 @@ public sealed class MarkdownService(ShopService shopService)
             .ToList();
 
         var totalCount = filteredItems.Count;
+        var itemsToSkip = (page - 1) * pageSize;
 
         var items = filteredItems
-            .Skip((page - 1) * pageSize)
+            .Skip(itemsToSkip)
             .Take(pageSize)
-            .Select(mapToMarkdownItemDto)
+            .Select(MapToMarkdownItemDto)
             .ToList();
 
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -49,7 +53,7 @@ public sealed class MarkdownService(ShopService shopService)
         return new PagedResult<MarkdownItemDto>(items, page, pageSize, totalCount, totalPages);
     }
     
-    private static MarkdownItemDto mapToMarkdownItemDto(MarkdownItem item)
+    private static MarkdownItemDto MapToMarkdownItemDto(MarkdownItem item)
     {
         return new MarkdownItemDto(
             item.Id,
