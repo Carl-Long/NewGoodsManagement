@@ -25,26 +25,40 @@ public sealed class MarkdownService(ShopService shopService)
         // When this moves to EF Core/IQueryable, do not materialise the full result
         // set here. Use CountAsync() for the total and then apply Skip/Take before
         // ToListAsync() so pagination happens in the database.
-        var filteredItems = query.OrderBy(item => item.Category).ToList();
+        //
+        // Use a deterministic sort order before paging.
+        // If multiple items have the same category, the additional sort fields ensure
+        // their relative order stays consistent so items are not skipped or repeated
+        // across pages.
+        var filteredItems = query
+            .OrderBy(item => item.Category)
+            .ThenBy(item => item.Name)
+            .ThenBy(item => item.Id)
+            .ToList();
 
         var totalCount = filteredItems.Count;
 
         var items = filteredItems
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(item => new MarkdownItemDto(
-                item.Id,
-                item.Name,
-                item.Category,
-                item.OriginalPrice,
-                item.NewPrice,
-                item.DiscountPercentage,
-                item.StockQuantity))
+            .Select(mapToMarkdownItemDto)
             .ToList();
 
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
         return new PagedResult<MarkdownItemDto>(items, page, pageSize, totalCount, totalPages);
+    }
+    
+    private static MarkdownItemDto mapToMarkdownItemDto(MarkdownItem item)
+    {
+        return new MarkdownItemDto(
+            item.Id,
+            item.Name,
+            item.Category,
+            item.OriginalPrice,
+            item.NewPrice,
+            item.DiscountPercentage,
+            item.StockQuantity);
     }
 
     // Simulates the undecided domain entity to allow mapping here for now
@@ -59,7 +73,7 @@ public sealed class MarkdownService(ShopService shopService)
         int StockQuantity);
 
     // Simulates the markdown items dataset
-private static readonly IReadOnlyList<MarkdownItem> Items =
+    private static readonly IReadOnlyList<MarkdownItem> Items =
     [
         // Oxford
         new(
